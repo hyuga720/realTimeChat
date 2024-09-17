@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "261598818514",
+    "project_id": "realtimechat-afdbc",
+    "storage_bucket": "realtimechat-afdbc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261598818514:android:ab8546726a206a51147d0b",
+        "android_client_info": {
+          "package_name": "com.hyuga.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN3nYTmN1e8ERqte4VZQDTJMhYpchnmBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
