@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestoreのインポート
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart'; // Providerをインポート
 import '../header.dart';
+import 'user_provider.dart'; // UserProviderをインポート
 
 class Chat extends StatelessWidget {
   final String screenName = 'チャット';
@@ -8,6 +10,8 @@ class Chat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = Provider.of<UserProvider>(context).userId; // ユーザーIDを取得
+
     return Scaffold(
       appBar: Header(headerTitle: screenName),
       body: Column(
@@ -54,7 +58,7 @@ class Chat extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
-                    _sendMessage();
+                    _sendMessage(userId); // メッセージ送信時にユーザーIDを使用
                   },
                 ),
               ],
@@ -65,11 +69,11 @@ class Chat extends StatelessWidget {
     );
   }
 
-  void _sendMessage() {
+  void _sendMessage(String userId) {
     if (_controller.text.isNotEmpty) {
       FirebaseFirestore.instance.collection('chatRooms').doc('defaultRoom').collection('messages').add({
         'message': _controller.text,
-        'userId': 'anonymous', // ここではユーザーIDを仮で設定。実際にはFirebase Authで取得したユーザーIDを使用する。
+        'userId': userId, // 取得したユーザーIDを使用
         'timestamp': FieldValue.serverTimestamp(),
       });
       _controller.clear();

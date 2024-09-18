@@ -6,7 +6,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   final String headerTitle;
 
   // コンストラクタで必須パラメータとしてheaderTitleを受け取る
-  Header({required this.headerTitle});
+  Header({super.key, required this.headerTitle});
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);

@@ -8,6 +8,7 @@ import 'routes/profile.dart';
 import 'routes/home.dart';
 import 'routes/settings.dart';
 import 'login_screen.dart'; // ログイン画面のインポート
+import 'routes/user_provider.dart'; // UserProviderのインポート
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,12 +26,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutterの練習', // アプリの名前
-      theme: ThemeData(
-        primaryColor: Colors.green,
+    return ChangeNotifierProvider(
+      create: (_) => UserProvider(), // UserProviderを提供
+      child: MaterialApp(
+        title: 'Flutterの練習',
+        theme: ThemeData(
+          primaryColor: Colors.green,
+        ),
+        home: AuthWrapper(pageList: _pageList),
       ),
-      home: AuthWrapper(pageList: _pageList),
     );
   }
 }
@@ -49,44 +53,44 @@ class AuthWrapper extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData) {
-          // ユーザーがログインしている場合、BottomNavigationBar付きの画面を表示
           return ChangeNotifierProvider<BottomNavigationModel>(
             create: (_) => BottomNavigationModel(),
-            child: Consumer<BottomNavigationModel>(builder: (context, model, child) {
-              return Scaffold(
-                body: pageList[model.currentIndex], // 各ページを表示
-                bottomNavigationBar: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  items: [
-                    const BottomNavigationBarItem(
-                      icon: Icon(Icons.person),
-                      label: 'プロフィール',
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'ホーム',
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: Icon(Icons.chat),
-                      label: 'チャット',
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: Icon(Icons.settings),
-                      label: '設定',
-                    ),
-                  ],
-                  currentIndex: model.currentIndex,
-                  onTap: (index) {
-                    model.currentIndex = index;
-                  },
-                  selectedItemColor: Colors.pinkAccent,
-                  unselectedItemColor: Colors.black45,
-                ),
-              );
-            }),
+            child: Consumer<BottomNavigationModel>(
+              builder: (context, model, child) {
+                return Scaffold(
+                  body: pageList[model.currentIndex],
+                  bottomNavigationBar: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    items: const [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.person),
+                        label: 'プロフィール',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: 'ホーム',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.chat),
+                        label: 'チャット',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.settings),
+                        label: '設定',
+                      ),
+                    ],
+                    currentIndex: model.currentIndex,
+                    onTap: (index) {
+                      model.currentIndex = index;
+                    },
+                    selectedItemColor: Colors.pinkAccent,
+                    unselectedItemColor: Colors.black45,
+                  ),
+                );
+              },
+            ),
           );
         } else {
-          // ログインしていない場合はログイン画面を表示
           return LoginScreen();
         }
       },
