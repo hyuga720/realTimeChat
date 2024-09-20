@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart'; // Providerをインポート
-import '../header.dart';
+import 'package:provider/provider.dart';
 import 'user_provider.dart'; // UserProviderをインポート
 
 class Chat extends StatelessWidget {
@@ -10,10 +9,12 @@ class Chat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = Provider.of<UserProvider>(context).userId; // ユーザーIDを取得
+    final currentUserId = Provider.of<UserProvider>(context).userId; // 現在のユーザーIDを取得
 
     return Scaffold(
-      appBar: Header(headerTitle: screenName),
+      appBar: AppBar(
+        title: Text(screenName),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -33,9 +34,16 @@ class Chat extends StatelessWidget {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     var message = messages[index];
+                    String messageUserId = message['userId']; // FirestoreのuserIdを表示
+
                     return ListTile(
                       title: Text(message['message']),
-                      subtitle: Text('User: ${message['userId']}'),
+                      subtitle: Text('User: $messageUserId'),
+                      onLongPress: messageUserId == currentUserId
+                          ? () {
+                        _deleteMessage(context, message.id);
+                      }
+                          : null, // 他のユーザーのメッセージは削除できない
                     );
                   },
                 );
@@ -50,7 +58,7 @@ class Chat extends StatelessWidget {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      labelText: 'Enter your message',
+                      labelText: 'メッセージを入力',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -58,7 +66,7 @@ class Chat extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
-                    _sendMessage(userId); // メッセージ送信時にユーザーIDを使用
+                    _sendMessage(currentUserId); // メッセージ送信時にユーザーIDを使用
                   },
                 ),
               ],
@@ -73,10 +81,46 @@ class Chat extends StatelessWidget {
     if (_controller.text.isNotEmpty) {
       FirebaseFirestore.instance.collection('chatRooms').doc('defaultRoom').collection('messages').add({
         'message': _controller.text,
-        'userId': userId, // 取得したユーザーIDを使用
+        'userId': userId, // userIdをFireStoreに保存
         'timestamp': FieldValue.serverTimestamp(),
       });
       _controller.clear();
     }
   }
+
+  void _deleteMessage(BuildContext context, String messageId) async {
+    bool confirmed = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('メッセージを削除しますか？'),
+          actions: [
+            TextButton(
+              child: Text('キャンセル'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('削除'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed) {
+      FirebaseFirestore.instance
+          .collection('chatRooms')
+          .doc('defaultRoom')
+          .collection('messages')
+          .doc(messageId)
+          .delete();
+    }
+  }
 }
+
+
